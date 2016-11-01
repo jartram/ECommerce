@@ -46,13 +46,32 @@ namespace ECommerce.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "DeparmentId,Name")] Department department)
+        public ActionResult Create([Bind(Include = "DepartmentId,Name")] Department department)
         {
             if (ModelState.IsValid)
             {
-                db.Departments.Add(department);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                try
+                {
+                    db.Departments.Add(department);
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+
+
+
+                    if (ex.InnerException.InnerException != null &&
+                    ex.InnerException.InnerException.Message.Contains("_Index"))
+                    {
+                        ModelState.AddModelError(string.Empty, "There is a record with the same value");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, ex.Message);
+                    }
+                    
+                }
             }
 
             return View(department);
@@ -78,13 +97,28 @@ namespace ECommerce.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "DeparmentId,Name")] Department department)
+        public ActionResult Edit([Bind(Include = "DepartmentId,Name")] Department department)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(department).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                try
+                {
+                    db.Entry(department).State = EntityState.Modified;
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    if (ex.InnerException.InnerException != null &&
+                    ex.InnerException.InnerException.Message.Contains("_Index"))
+                    {
+                        ModelState.AddModelError(string.Empty, "There is a record with the same value");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, ex.Message);
+                    }
+                }
             }
             return View(department);
         }
@@ -111,8 +145,30 @@ namespace ECommerce.Controllers
         {
             Department department = db.Departments.Find(id);
             db.Departments.Remove(department);
-            db.SaveChanges();
-            return RedirectToAction("Index");
+
+            try
+            {
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+
+                if (ex.InnerException.InnerException != null &&
+                    ex.InnerException.InnerException.Message.Contains ("REFERENCE"))
+                {
+                    ModelState.AddModelError(string.Empty, "The record cant deleted because it has related records");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                }
+
+                
+            }
+
+            return View(department);
+
         }
 
         protected override void Dispose(bool disposing)
