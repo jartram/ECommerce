@@ -22,6 +22,7 @@ namespace ECommerce.Models
         [Required(ErrorMessage = "The field {0} is requiered")]
         [Range(1,Double.MaxValue, ErrorMessage ="You must select a department ID")]
         [Index("City_Name_Index",1, IsUnique = true)]
+        [Display(Name = "Department")]
         public int DepartmentId { get; set; }
 
         public virtual Department Department { get; set; }
